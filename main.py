@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
 from ui import initUI
 
-class Window(QtWidgets.QMainWindow)
+class Window(QtWidgets.QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
 
