@@ -6,8 +6,6 @@ from PyQt5 import QtGui
 from PyQt5 import QtCore
 import algorithm as alg
 
-# pix = ""
-
 class initUI(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(initUI, self).__init__(*args, **kwargs)
@@ -20,9 +18,9 @@ class initUI(QtWidgets.QMainWindow):
         self.setFixedSize(self.width(), self.height())
         self.center()
         self.widgets()
+        self.layouts()
         self.menubar()
         self.menuEvent()
-        self.layouts()
         self.UIsetting()
 
     def center(self):
@@ -32,9 +30,16 @@ class initUI(QtWidgets.QMainWindow):
         self.move(qr.topLeft())
 
     def widgets(self):
-        # trainsformation = # 嵌入图像旋转缩放画布
         self.scaling = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.rotation = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.label_pic = QtWidgets.QLabel(self)
+        self.label_pic.setGeometry(100,100,400,400)
+        # self.label_pic.setPixmap(QtGui.QPixmap('./inputImgs/test.jpg'))
+
+    def layouts(self):
+        widget = QtWidgets.QWidget()
+        self.setCentralWidget(widget)
+        Vbox = QtWidgets.QVBoxLayout()
 
     def menubar(self):
         self.menubar = self.menuBar() # 获取窗体菜单栏
@@ -90,32 +95,35 @@ class initUI(QtWidgets.QMainWindow):
         self.cutmore.addAction(self.imageSynthesis)
 
     def menuEvent(self):
-        self.open.triggered.connect(alg.FileAlgoriThms.OpenFile)
-        self.save.triggered.connect(alg.FileAlgoriThms.SaveFile)
-        self.quit.triggered.connect(alg.FileAlgoriThms.QuitProgram)
+        file_algorithms = alg.FileAlgoriThms()
+        self.open.triggered.connect(lambda:file_algorithms.OpenFile())
+        self.save.triggered.connect(lambda:file_algorithms.SaveFile())
+        self.quit.triggered.connect(lambda:file_algorithms.QuitProgram())
 
-        self.midgray.triggered.connect(alg.GrayThms.MidGrayThm)
-        self.light.triggered.connect(alg.GrayThms.LightThm)
-        self.dark.triggered.connect(alg.GrayThms.DarkThm)
-        self.binarization.triggered.connect(alg.GrayThms.BinarizationThm)
+        gray_thms = alg.GrayThms()
+        self.midgray.triggered.connect(lambda:gray_thms.MidGrayThm())
+        self.light.triggered.connect(lambda:gray_thms.LightThm())
+        self.dark.triggered.connect(lambda:gray_thms.DarkThm())
+        self.binarization.triggered.connect(lambda:gray_thms.BinarizationThm())
 
-        self.gaussfilter.triggered.connect(alg.FilterThms.GaussFilterThm)
-        self.medianfilter.triggered.connect(alg.FilterThms.MedianFilterThm)
-        self.meanfilter.triggered.connect(alg.FilterThms.MeanFilterThm)
+        fliter_thms = alg.FilterThms()
+        self.gaussfilter.triggered.connect(lambda:fliter_thms.GaussFilterThm())
+        self.medianfilter.triggered.connect(lambda:fliter_thms.MedianFilterThm())
+        self.meanfilter.triggered.connect(lambda:fliter_thms.MeanFilterThm())
 
-        self.twicecompress.triggered.connect(alg.CompressThms.TwiceCompressThm)
-        self.quintupling.triggered.connect(alg.CompressThms.QuintuplingThm)
-        self.tenfoldcompression.triggered.connect(alg.CompressThms.TenfoldCompressionThm)
+        compress_thms = alg.CompressThms()
+        self.twicecompress.triggered.connect(lambda:compress_thms.TwiceCompressThm())
+        self.quintupling.triggered.connect(lambda:compress_thms.QuintuplingThm())
+        self.tenfoldcompression.triggered.connect(lambda:compress_thms.TenfoldCompressionThm())
 
-        self.quartile.triggered.connect(alg.SectionThms.QuartileThm)
-        self.NineEqualparts.triggered.connect(alg.SectionThms.NineEqualPartsThm)
+        section_thms = alg.SectionThms()
+        self.quartile.triggered.connect(lambda:section_thms.QuartileThm())
+        self.NineEqualparts.triggered.connect(lambda:section_thms.NineEqualPartsThm())
 
-        self.AIcutout.triggered.connect(alg.CutOutThms.AIcutoutThm)
-        self.bgmean.triggered.connect(alg.CutOutThms.BgMeanThm)
-        self.imageSynthesis.triggered.connect(alg.CutOutThms.ImageSynthesisThm)
-
-    def layouts(self):
-        pass
+        cutout_thms = alg.CutOutThms()
+        self.AIcutout.triggered.connect(lambda:cutout_thms.AIcutoutThm())
+        self.bgmean.triggered.connect(lambda:cutout_thms.BgMeanThm())
+        self.imageSynthesis.triggered.connect(lambda:cutout_thms.ImageSynthesisThm())
 
     def UIsetting(self):
         pass

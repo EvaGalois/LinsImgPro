@@ -20,8 +20,8 @@ class FileAlgoriThms:
         bytesPerLine = int(totalBytes / height)
         img_Lab = QtGui.QImage(imgRGB, width, height, bytesPerLine, QtGui.QImage.Format_RGB888)
         self.pic = QtGui.QPixmap(img_Lab).scaled(width, height)
-        # # m.initUI.label_pic.setPixmap(pix)
-        # print(m.initUI.label_pic)
+        mainui = m.initUI()
+        mainui.label_pic.setPixmap(self.pic)
 
     def SaveFile(self):
         print('successfully')
