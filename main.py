@@ -1,11 +1,16 @@
+#!./env/bin/python
+#-*- coding: utf-8 -*-
+
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 from PyQt5 import QtCore
 import algorithm as alg
 
+# pix = ""
+
 class initUI(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        super(initUI, self).__init__(parent)
+    def __init__(self, *args, **kwargs):
+        super(initUI, self).__init__(*args, **kwargs)
         self.setupUI()
 
     def setupUI(self):
@@ -32,7 +37,6 @@ class initUI(QtWidgets.QMainWindow):
         self.rotation = QtWidgets.QSlider(QtCore.Qt.Horizontal)
 
     def menubar(self):
-        # self.file.triggered[QtWidgets.QAction].connect(self.processtrigger)
         self.menubar = self.menuBar() # 获取窗体菜单栏
 
         self.file = self.menubar.addMenu('文件') # 菜单栏添加菜单项
@@ -86,54 +90,41 @@ class initUI(QtWidgets.QMainWindow):
         self.cutmore.addAction(self.imageSynthesis)
 
     def menuEvent(self):
-        self.open.triggered.connect(alg.fileAlgorithm.openfile)
-        self.save.triggered.connect(alg.fileAlgorithm.savefile)
-        self.quit.triggered.connect(alg.fileAlgorithm.quitprogram)
+        self.open.triggered.connect(alg.FileAlgoriThms.OpenFile)
+        self.save.triggered.connect(alg.FileAlgoriThms.SaveFile)
+        self.quit.triggered.connect(alg.FileAlgoriThms.QuitProgram)
 
-        self.midgray.triggered.connect(alg.fileAlgorithm.midgrayThm)
-        self.light.triggered.connect(alg.fileAlgorithm.lightThm)
-        self.dark.triggered.connect(alg.fileAlgorithm.darkThm)
-        self.binarization.triggered.connect(alg.fileAlgorithm.binarizationThm)
+        self.midgray.triggered.connect(alg.GrayThms.MidGrayThm)
+        self.light.triggered.connect(alg.GrayThms.LightThm)
+        self.dark.triggered.connect(alg.GrayThms.DarkThm)
+        self.binarization.triggered.connect(alg.GrayThms.BinarizationThm)
 
-        self.gaussfilter.triggered.connect(alg.fileAlgorithm.gaussfilterThm)
-        self.medianfilter.triggered.connect(alg.fileAlgorithm.medianfilterThm)
-        self.meanfilter.triggered.connect(alg.fileAlgorithm.meanfilterThm)
+        self.gaussfilter.triggered.connect(alg.FilterThms.GaussFilterThm)
+        self.medianfilter.triggered.connect(alg.FilterThms.MedianFilterThm)
+        self.meanfilter.triggered.connect(alg.FilterThms.MeanFilterThm)
 
-        self.twicecompress.triggered.connect(alg.fileAlgorithm.twicecompressThm)
-        self.quintupling.triggered.connect(alg.fileAlgorithm.quintuplingThm)
-        self.tenfoldcompression.triggered.connect(alg.fileAlgorithm.tenfoldcompressionThm)
+        self.twicecompress.triggered.connect(alg.CompressThms.TwiceCompressThm)
+        self.quintupling.triggered.connect(alg.CompressThms.QuintuplingThm)
+        self.tenfoldcompression.triggered.connect(alg.CompressThms.TenfoldCompressionThm)
 
-        self.quartile.triggered.connect(alg.fileAlgorithm.quartileThm)
-        self.NineEqualparts.triggered.connect(alg.fileAlgorithm.NineEqualpartsThm)
+        self.quartile.triggered.connect(alg.SectionThms.QuartileThm)
+        self.NineEqualparts.triggered.connect(alg.SectionThms.NineEqualPartsThm)
 
-        self.AIcutout.triggered.connect(alg.fileAlgorithm.AIcutoutThm)
-        self.bgmean.triggered.connect(alg.fileAlgorithm.bgmeanThm)
-        self.imageSynthesis.triggered.connect(alg.fileAlgorithm.imageSynthesisThm)
-
-
+        self.AIcutout.triggered.connect(alg.CutOutThms.AIcutoutThm)
+        self.bgmean.triggered.connect(alg.CutOutThms.BgMeanThm)
+        self.imageSynthesis.triggered.connect(alg.CutOutThms.ImageSynthesisThm)
 
     def layouts(self):
         pass
-
-
-
 
     def UIsetting(self):
         pass
 
 
 
-
-
+    # ignore test of the triggered[QtWidgets.QAction]
     def processtrigger(self, Qaction):
         print(Qaction.text(), 'is triggered!')
-        # 测试 triggered[QtWidgets.QAction] 点击函数
-
-
-
-
-
-
 
 if __name__ == '__main__':
     import sys
