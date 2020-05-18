@@ -7,8 +7,14 @@ from PyQt5 import QtCore
 # from PyQt5 import Qt
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 import cv2
 import math
+
+import traceback
+
+class SomeCustomException(Exception):
+    pass
 
 class initUI(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -42,7 +48,7 @@ class initUI(QtWidgets.QMainWindow):
         # self.rotation = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.rotation = QtWidgets.QSlider(QtCore.Qt.Vertical)
 
-        self.scaling.setMinimum(10)
+        self.scaling.setMinimum(2)
         self.scaling.setMaximum(200)
         self.scaling.setSingleStep(2)
         self.scaling.setTickInterval(2)
@@ -187,6 +193,8 @@ class initUI(QtWidgets.QMainWindow):
             filename, filetype = QtWidgets.QFileDialog.getOpenFileName(None, "OpenFile", "./inputImgs", "All Files(*);;Text Files(*.png);;Text Files(*.jpg)")
             orimg = cv2.imread(filename)
             imgGray = cv2.cvtColor(orimg, cv2.COLOR_BGR2GRAY)
+            print(orimg.shape)
+            print(orimg)
             imgRGB = cv2.cvtColor(orimg, cv2.COLOR_BGR2RGB)
             height, width, nframes, = imgRGB.shape
             totalBytes = imgRGB.nbytes
@@ -412,34 +420,210 @@ class initUI(QtWidgets.QMainWindow):
             self.showMessageBox()
 
     def BinarizationThm(self):
-        print('successfully')
+        try:
+            print(filename, "自适应阈值二值化")
+            ret, adaptionDo_img = cv2.threshold(imgGray, 0, 255, cv2.THRESH_OTSU)
+            cv2.namedWindow("THRESH_OTSU", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("THRESH_OTSU", int(width * 1), int(height * 1))
+            cv2.imshow("THRESH_OTSU", adaptionDo_img)
+            cv2.moveWindow("DarkGRAY", 1000, 500)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def GaussFilterThm(self):
-        print('successfully')
+        try:
+            print(filename, "高斯滤波处理")
+            img_GaussianBlur = cv2.GaussianBlur(orimg, (11, 11), 0)
+            cv2.namedWindow("GaussianBlur", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("GaussianBlur", int(width * 1), int(height * 1))
+            cv2.imshow("GaussianBlur", img_GaussianBlur)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def MedianFilterThm(self):
-        print('successfully')
+        try:
+            print(filename, "中值滤波处理")
+            img_medianBlur = cv2.medianBlur(orimg, 9)
+            cv2.namedWindow("MedianBlur", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("MedianBlur", int(width * 1), int(height * 1))
+            cv2.imshow("MedianBlur", img_medianBlur)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def MeanFilterThm(self):
-        print('successfully')
+        try:
+            print(filename, "均值滤波处理")
+            img_Blur = cv2.blur(orimg, (10, 10))
+            cv2.namedWindow("MeanBlur", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("MeanBlur", int(width * 1), int(height * 1))
+            cv2.imshow("MeanBlur", img_Blur)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def TwiceCompressThm(self):
-        print('successfully')
+        try:
+            decreaseimg = cv2.resize(orimg, (int(0.5 * width), int(0.5 * height)))
+            RGBdecimg = cv2.cvtColor(decreaseimg, cv2.COLOR_BGR2RGB)
+            decheight, decwidth, decnframes, = RGBdecimg.shape
+            totalBytes = RGBdecimg.nbytes
+            decbytesPerLine = int(totalBytes / decheight)
+            decimage = QtGui.QImage(RGBdecimg, decwidth, decheight, decbytesPerLine, QtGui.QImage.Format_RGB888)
+            self.decpix = QtGui.QPixmap(decimage).scaled(decwidth, decheight)
+            self.label_pic.setPixmap(self.decpix)
+
+            cv2.namedWindow("original", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("original", width, height)
+            cv2.imshow("original", orimg)
+            cv2.namedWindow("compression", cv2.WINDOW_NORMAL)
+            # cv2.resizeWindow("compression", int(width * 0.5), int(height * 0.5))
+            cv2.imshow("compression", decreaseimg)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def QuintuplingThm(self):
-        print('successfully')
+        try:
+            decreaseimg = cv2.resize(orimg, (int(0.2 * width),int(0.2 * height)))
+            RGBdecimg = cv2.cvtColor(decreaseimg, cv2.COLOR_BGR2RGB)
+            decheight, decwidth, decnframes, = RGBdecimg.shape
+            totalBytes = RGBdecimg.nbytes
+            decbytesPerLine = int(totalBytes / decheight)
+            decimage = QtGui.QImage(RGBdecimg, decwidth, decheight, decbytesPerLine, QtGui.QImage.Format_RGB888)
+            self.decpix = QtGui.QPixmap(decimage).scaled(decwidth, decheight)
+            self.label_pic.setPixmap(self.decpix)
+
+            cv2.namedWindow("original", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("original", width, height)
+            cv2.imshow("original", orimg)
+            cv2.namedWindow("compression", cv2.WINDOW_NORMAL)
+            # cv2.resizeWindow("compression", int(width * 0.2), int(height * 0.2))
+            cv2.imshow("compression", decreaseimg)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def TenfoldCompressionThm(self):
-        print('successfully')
+        try:
+            decreaseimg = cv2.resize(orimg, (int(0.1 * width),int(0.1 * height)))
+            RGBdecimg = cv2.cvtColor(decreaseimg, cv2.COLOR_BGR2RGB)
+            decheight, decwidth, decnframes, = RGBdecimg.shape
+            totalBytes = RGBdecimg.nbytes
+            decbytesPerLine = int(totalBytes / decheight)
+            decimage = QtGui.QImage(RGBdecimg, decwidth, decheight, decbytesPerLine, QtGui.QImage.Format_RGB888)
+            self.decpix = QtGui.QPixmap(decimage).scaled(decwidth, decheight)
+            self.label_pic.setPixmap(self.decpix)
+
+            cv2.namedWindow("original", cv2.WINDOW_NORMAL)
+            cv2.resizeWindow("original", width, height)
+            cv2.imshow("original", orimg)
+            cv2.namedWindow("compression", cv2.WINDOW_NORMAL)
+            # cv2.resizeWindow("compression", int(width * 0.1), int(height * 0.1))
+            cv2.imshow("compression", decreaseimg)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def QuartileThm(self):
-        print('successfully')
+        try:
+            pilimage = Image.open(filename)
+            item_width = int(width / 2)
+            item_height = int(height / 2)
+            box_list = []
+            # (left, upper, right, lower)
+            for i in range(0, 2):  # 两重循环，生成 4 张图片基于原图的位置
+                for j in range(0, 2):
+                    # print((i*item_width,j*item_width,(i+1)*item_width,(j+1)*item_width))
+                    box = (j * item_width, i * item_height, (j + 1) * item_width, (i + 1) * item_height)
+                    box_list.append(box)
+            image_list = [pilimage.crop(box) for box in box_list]
+            for i in range(4):
+                plt.subplot(2, 2, i + 1), plt.imshow(image_list[i], 'gray')
+                plt.title(str(i + 1))
+                plt.xticks([]), plt.yticks([])
+            plt.show()
+
+        except:
+            self.showMessageBox()
 
     def NineEqualPartsThm(self):
-        print('successfully')
+        try:
+            pilimage = Image.open(filename)
+            item_width = int(width / 3)
+            item_height = int(height / 3)
+            box_list = []
+            # (left, upper, right, lower)
+            for i in range(0, 3):  # 两重循环，生成 9 张图片基于原图的位置
+                for j in range(0, 3):
+                    # print((i*item_width,j*item_width,(i+1)*item_width,(j+1)*item_width))
+                    box = (j * item_width, i * item_height, (j + 1) * item_width, (i + 1) * item_height)
+                    box_list.append(box)
+            image_list = [pilimage.crop(box) for box in box_list]
+            for i in range(9):
+                plt.subplot(3, 3, i + 1), plt.imshow(image_list[i], 'gray')
+                plt.title(str(i + 1))
+                plt.xticks([]), plt.yticks([])
+            plt.show()
+
+        except:
+            self.showMessageBox()
 
     def AIcutoutThm(self):
-        print('successfully')
+        try:
+            import paddlehub as hub
+            print(filename)
+            file = []
+            # file = filename
+            file.append(filename)
+
+            # 加载模型
+            humanseg = hub.Module(name="deeplabv3p_xception65_humanseg")
+            print(humanseg)
+            # 抠图
+            result = humanseg.segmentation(data = {"image": file})
+            # print(result.shape)
+            print(len(result))
+            print(result[0]['data'].shape)
+            result_seg = result[0]['data']
+            # result_img = cv2.imread(result_seg, cv2.IMREAD_COLOR)
+            result_seg = result_seg / 255
+            # print(result_seg.shape)
+            # print(result_seg)
+            result_img = cv2.cvtColor(result_seg, cv2.COLOR_BGR2RGBA)
+            plt.imshow(result_img)
+            # plt.xticks([]), plt.yticks([])
+            # plt.show()
+
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('异常清理')
 
     def BgMeanThm(self):
         print('successfully')
@@ -448,7 +632,7 @@ class initUI(QtWidgets.QMainWindow):
         print('successfully')
 
     def showMessageBox(self):
-       print('错误')
+       print('异常清理')
 
 if __name__ == '__main__':
     import sys
