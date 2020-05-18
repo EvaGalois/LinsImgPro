@@ -325,9 +325,6 @@ class initUI(QtWidgets.QMainWindow):
                 matRotate = cv2.getRotationMatrix2D((newSide * 0.5, newSide * 0.5), Ang, 1 / math.sqrt(2))
                 changeimgcode = 3
 
-            # matRotate[0,2] += (new_image_length - Iwidth) / 2 # 重点在这步
-            # matRotate[1,2] += (new_image_length - Iheight) / 2 # 重点在这步
-
             imgRotate = cv2.warpAffine(RGBimgIm, matRotate, (newSide, newSide), borderValue=(0, 0, 0))
 
             NtotalBytes = imgRotate.nbytes
@@ -356,13 +353,63 @@ class initUI(QtWidgets.QMainWindow):
             print('缩放 1', '旋转 0')
 
     def MidGrayThm(self):
-        print('successfully')
+        try:
+            print(filename,"图像转中灰")
+            cv2.namedWindow("MidGRAY")
+            cv2.resizeWindow("MidGRAY", int(width * 1), int(height * 1))
+            MidGray = imgGray
+            cv2.imshow("MidGRAY", MidGray)
+            cv2.moveWindow("MidGRAY", 1000, 500)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def LightThm(self):
-        print('successfully')
+        try:
+            print(filename,"图像转浅灰")
+            cv2.namedWindow("LightGRAY")
+            cv2.resizeWindow("LightGRAY", int(width * 1), int(height * 1))
+            LightGray = imgGray
+            lightGray = np.ravel(LightGray)
+            for index in range(0, len(lightGray)):
+                if lightGray[index] < 192:
+                    lightGray[index] += 64
+                else:
+                    lightGray[index] = 255
+            lightGrayImg = lightGray.reshape((height, width))
+            cv2.imshow("LightGRAY", lightGrayImg)
+            cv2.moveWindow("LightGRAY", 1000, 500)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def DarkThm(self):
-        print('successfully')
+        try:
+            print(filename,"图像转浅灰")
+            cv2.namedWindow("DarkGRAY")
+            cv2.resizeWindow("DarkGRAY", int(width * 1), int(height * 1))
+            DarkGray = imgGray
+            darkGray = np.ravel(DarkGray)
+            for index in range(0, len(darkGray)):
+                if darkGray[index] > 64:
+                    darkGray[index] -= 64
+                else:
+                    darkGray[index] = 0
+            darkGrayImg = darkGray.reshape((height, width))
+            cv2.imshow("DarkGRAY", darkGrayImg)
+            cv2.moveWindow("DarkGRAY", 1000, 500)
+            k = cv2.waitKey(0)
+            if k == 27:
+                cv2.destroyAllWindows()
+
+        except:
+            self.showMessageBox()
 
     def BinarizationThm(self):
         print('successfully')
