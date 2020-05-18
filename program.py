@@ -5,7 +5,10 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 from PyQt5 import QtCore
 # from PyQt5 import Qt
+import numpy as np
+from PIL import Image
 import cv2
+import math
 
 class initUI(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -13,7 +16,7 @@ class initUI(QtWidgets.QMainWindow):
         self.setupUI()
 
     def setupUI(self):
-        self.resize(1000, 1000)
+        self.resize(800, 800)
         self.setWindowTitle('图像处理')
         self.setWindowIcon(QtGui.QIcon('web.png'))
         self.setMinimumSize(400, 400)
@@ -24,6 +27,7 @@ class initUI(QtWidgets.QMainWindow):
         self.layouts()
         self.menubar()
         self.menuEvent()
+        self.SliderEvent()
         self.UIsetting()
 
     def center(self):
@@ -33,8 +37,26 @@ class initUI(QtWidgets.QMainWindow):
         self.move(qr.topLeft())
 
     def widgets(self):
-        self.scaling = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.rotation = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        # self.scaling = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.scaling = QtWidgets.QSlider(QtCore.Qt.Vertical)
+        # self.rotation = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.rotation = QtWidgets.QSlider(QtCore.Qt.Vertical)
+
+        self.scaling.setMinimum(10)
+        self.scaling.setMaximum(200)
+        self.scaling.setSingleStep(2)
+        self.scaling.setTickInterval(2)
+        self.scaling.setValue(100)
+        self.scaling.setTickPosition(QtWidgets.QSlider.TicksLeft)
+        # self.scaling.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+        self.rotation.setMinimum(-180)
+        self.rotation.setMaximum(180)
+        self.rotation.setSingleStep(4)
+        self.rotation.setTickInterval(4)
+        self.rotation.setValue(0)
+        self.rotation.setTickPosition(QtWidgets.QSlider.TicksRight)
+        # self.rotation.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+
         self.label_pic = QtWidgets.QLabel(self)
 
     def layouts(self):
@@ -42,12 +64,30 @@ class initUI(QtWidgets.QMainWindow):
         widget = QtWidgets.QWidget()
 
         # 垂直布局盒子
-        Vbox = QtWidgets.QVBoxLayout()
-        Vbox.addWidget(self.scaling)
-        Vbox.addWidget(self.rotation)
-        Vbox.addWidget(self.label_pic)
+        Hbox = QtWidgets.QHBoxLayout()
+        Hbox.addWidget(self.scaling)
+        Hbox.addWidget(self.label_pic)
+        Hbox.addWidget(self.rotation)
 
-        widget.setLayout(Vbox)
+        Hbox.setContentsMargins(0, 0, 0, 0)
+        widget.setLayout(Hbox)
+
+        self.scaleSign = QtWidgets.QLabel('缩放', widget)
+        self.scaleSign.move(60, 30)
+        self.scaleSign.setFont(QtGui.QFont("Arial", 18))
+        self.scaleSign.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+        self.angelSign = QtWidgets.QLabel('旋转', widget)
+        self.angelSign.move(60, 80)
+        self.angelSign.setFont(QtGui.QFont("Arial", 18))
+        self.angelSign.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+        self.scaleLab = QtWidgets.QLabel('1', widget)
+        self.scaleLab.move(110, 30)
+        self.scaleLab.setFont(QtGui.QFont("Arial", 20))
+        self.scaleLab.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+        self.angelLab = QtWidgets.QLabel('0', widget)
+        self.angelLab.move(110, 80)
+        self.angelLab.setFont(QtGui.QFont("Arial", 20))
+        self.angelLab.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
 
         # 实例化后的 QWidget 给 QMainWindow 设置 setCentralWidget
         self.setCentralWidget(widget)
@@ -130,6 +170,10 @@ class initUI(QtWidgets.QMainWindow):
         self.bgmean.triggered.connect(self.BgMeanThm)
         self.imageSynthesis.triggered.connect(self.ImageSynthesisThm)
 
+    def SliderEvent(self):
+        self.scaling.valueChanged.connect(self.ScalingValueChanged)
+        self.rotation.valueChanged.connect(self.RotationValueChanged)
+
     def UIsetting(self):
         pass
 
@@ -137,28 +181,34 @@ class initUI(QtWidgets.QMainWindow):
     def processtrigger(self, Qaction):
         print(Qaction.text(), 'is triggered!')
 
-    def OpenFile(self, use):
+    def OpenFile(self):
         global height, width, nframes, image, bytesPerLine, filename, imgGray, orimg, imgRGB
+        try:
+            filename, filetype = QtWidgets.QFileDialog.getOpenFileName(None, "OpenFile", "./inputImgs", "All Files(*);;Text Files(*.png);;Text Files(*.jpg)")
+            orimg = cv2.imread(filename)
+            imgGray = cv2.cvtColor(orimg, cv2.COLOR_BGR2GRAY)
+            imgRGB = cv2.cvtColor(orimg, cv2.COLOR_BGR2RGB)
+            height, width, nframes, = imgRGB.shape
+            totalBytes = imgRGB.nbytes
+            bytesPerLine = int(totalBytes / height)
+            img_Lab = QtGui.QImage(imgRGB, width, height, bytesPerLine, QtGui.QImage.Format_RGB888)
+            self.pic = QtGui.QPixmap(img_Lab).scaled(width, height)
+            self.label_pic.setPixmap(self.pic)
+            print(width, height)
 
-        filename, filetype = QtWidgets.QFileDialog.getOpenFileName(None, "OpenFile", "./inputImgs", "All Files(*);;Text Files(*.png);;Text Files(*.jpg)")
-        orimg = cv2.imread(filename)
-        imgGray = cv2.cvtColor(orimg, cv2.COLOR_BGR2GRAY)
-        imgRGB = cv2.cvtColor(orimg, cv2.COLOR_BGR2RGB)
-        height, width, nframes, = imgRGB.shape
-        totalBytes = imgRGB.nbytes
-        bytesPerLine = int(totalBytes / height)
-        img_Lab = QtGui.QImage(imgRGB, width, height, bytesPerLine, QtGui.QImage.Format_RGB888)
-        self.pic = QtGui.QPixmap(img_Lab).scaled(width, height)
-        self.label_pic.setPixmap(self.pic)
-        print(width, height)
+            if width < 1000 & height < 1000:
+                self.setFixedSize(width * 1.2, height * 1.2)
+            elif width > 1000 & height > 1000:
+                self.setFixedSize(width, height)
 
-        if width < 1000 & height < 1000:
-            self.setFixedSize(width * 1.2, height * 1.2)
-        elif width > 1000 & height > 1000:
-            self.setFixedSize(width, height)
+            self.scaling.setValue(100)
+            self.rotation.setValue(0)
 
-        self.label_pic.resize(width, height)
-        self.label_pic.setAlignment(QtCore.Qt.AlignCenter)
+            self.label_pic.resize(width, height)
+            self.label_pic.setAlignment(QtCore.Qt.AlignCenter)
+
+        except:
+            self.showMessageBox()
 
     def SaveFile(self):
         #获取文件路径
@@ -166,7 +216,9 @@ class initUI(QtWidgets.QMainWindow):
             file_name = QtWidgets.QFileDialog.getSaveFileName(self, "SaveFile", "./outputImgs","Text Files(*.png);;All Files(*)")
             print(file_name[0])
             qimg = self.label_pic.pixmap().toImage()  # 获取Qlabel图片
+            print(qimg)
             mat_img = self.qimage2mat(qimg)  # 将Qimage转换为mat类型
+            print(mat_img)
             cv2.imwrite(file_name[0], mat_img)
             # self.btn_saveFile = QPushButton(self)
             # self.btn_saveFile.file(filename,file_name[0])
@@ -177,13 +229,131 @@ class initUI(QtWidgets.QMainWindow):
         try:
             ptr = qimg.constBits()
             ptr.setsize(qimg.byteCount())
-            mat = np.array(ptr).reshape(qimg.height(), qimg.width(), 4)  # 注意这地方通道数一定要填4，否则出错
+            mat = np.array(ptr).reshape(qimg.height(), qimg.width(), 4)
             return mat
         except:
-            pass
+            print('error qimage2mat')
 
     def QuitProgram(self):
-        print('successfully')
+        self.close()
+
+    def ScalingValueChanged(self):
+        try:
+            zoomScale = self.scaling.value() * 0.01
+            zoomScale = round(zoomScale, 2)
+            self.scaleLab.setText(str(zoomScale))
+
+            Ang = eval(self.angelLab.text())
+            # print(Ang)
+            image = Image.fromarray(orimg.astype('uint8')).convert('RGB')
+            Iwidth, Iheight = image.size
+            new_image_length = Iwidth if Iwidth > Iheight else Iheight
+            new_image = Image.new(image.mode, (new_image_length, new_image_length), color='#000')
+            if Iwidth > Iheight:  # 原图宽大于高，则填充图片的竖直维度
+                new_image.paste(image, (0, int((new_image_length - Iheight) / 2)))
+            else:
+                new_image.paste(image, (int((new_image_length - Iwidth) / 2), 0))
+            imgIm = np.array(new_image)
+            RGBimgIm = cv2.cvtColor(imgIm, cv2.COLOR_BGR2RGB)
+            newSide = max(RGBimgIm.shape[0], RGBimgIm.shape[1])
+
+            if width < height:
+                matRotate = cv2.getRotationMatrix2D((newSide * 0.5, newSide * 0.5), Ang, 1 / math.sqrt((width / height) ** 2 + 1 ** 2))
+                changeimgcode = 1
+            elif width > height:
+                matRotate = cv2.getRotationMatrix2D((newSide * 0.5, newSide * 0.5), Ang, 1 / math.sqrt((height / width) ** 2 + 1 ** 2))
+                changeimgcode = 2
+            else:
+                matRotate = cv2.getRotationMatrix2D((newSide * 0.5, newSide * 0.5), Ang, 1 / math.sqrt(2))
+                changeimgcode = 3
+
+            imgRotate = cv2.warpAffine(RGBimgIm, matRotate, (newSide, newSide), borderValue=(0, 0, 0))
+
+            # cv2.imshow("imgRotate", imgRotate)
+            # cv2.waitKey(0)
+
+            totalBytes = imgRotate.nbytes
+            bytesPerLine = int(totalBytes / newSide)
+            image = QtGui.QImage(imgRotate, newSide, newSide, bytesPerLine, QtGui.QImage.Format_RGB888)
+
+            print('缩放', zoomScale)
+
+            if changeimgcode == 1:
+                ReductionFactor = math.sqrt((width / height) ** 2 + 1 ** 2)
+            elif changeimgcode == 2:
+                ReductionFactor = math.sqrt((height / width) ** 2 + 1 ** 2)
+            else:
+                ReductionFactor = math.sqrt(2)
+
+            self.pic = QtGui.QPixmap(image).scaled(int(newSide * zoomScale * ReductionFactor), int(newSide * zoomScale * ReductionFactor))
+            self.label_pic.setPixmap(self.pic)
+
+        except:
+            self.showMessageBox()
+
+    def RotationValueChanged(self):
+        try:
+            Ang = self.rotation.value()
+            self.angelLab.setText(str(Ang))
+            zoomScale = eval(self.scaleLab.text())
+            # print(zoomScale)
+
+            w = int(zoomScale * orimg.shape[0])
+            h = int(zoomScale * orimg.shape[1])
+            mat = cv2.resize(orimg, (h, w))
+
+            image = Image.fromarray(mat.astype('uint8')).convert('RGB')
+            Iwidth, Iheight = image.size
+            new_image_length = Iwidth if Iwidth > Iheight else Iheight
+            new_image = Image.new(image.mode, (new_image_length, new_image_length), color='#000')
+
+            if Iwidth > Iheight:  # 原图宽大于高，则填充图片的竖直维度
+                new_image.paste(image, (0, int((new_image_length - Iheight) / 2)))
+            else:
+                new_image.paste(image, (int((new_image_length - Iwidth) / 2), 0))
+            imgIm = np.array(new_image)
+            RGBimgIm = cv2.cvtColor(imgIm, cv2.COLOR_BGR2RGB)
+            newSide = max(RGBimgIm.shape[0], RGBimgIm.shape[1])
+
+            if width < height:
+                matRotate = cv2.getRotationMatrix2D((newSide * 0.5, newSide * 0.5), Ang, 1 / math.sqrt((width / height) ** 2 + 1 ** 2))
+                changeimgcode = 1
+            elif width > height:
+                matRotate = cv2.getRotationMatrix2D((newSide * 0.5, newSide * 0.5), Ang, 1 / math.sqrt((height / width) ** 2 + 1 ** 2))
+                changeimgcode = 2
+            else:
+                matRotate = cv2.getRotationMatrix2D((newSide * 0.5, newSide * 0.5), Ang, 1 / math.sqrt(2))
+                changeimgcode = 3
+
+            # matRotate[0,2] += (new_image_length - Iwidth) / 2 # 重点在这步
+            # matRotate[1,2] += (new_image_length - Iheight) / 2 # 重点在这步
+
+            imgRotate = cv2.warpAffine(RGBimgIm, matRotate, (newSide, newSide), borderValue=(0, 0, 0))
+
+            NtotalBytes = imgRotate.nbytes
+            NbytesPerLine = int(NtotalBytes / newSide)
+            imgRotate = QtGui.QImage(imgRotate, newSide, newSide, NbytesPerLine, QtGui.QImage.Format_RGB888)
+
+            if changeimgcode == 1:
+                ReductionFactor = math.sqrt((width / height) ** 2 + 1 ** 2)
+            elif changeimgcode == 2:
+                ReductionFactor = math.sqrt((height / width) ** 2 + 1 ** 2)
+            else:
+                ReductionFactor = math.sqrt(2)
+
+            print('旋转', Ang)
+
+            self.pixdst = QtGui.QPixmap(imgRotate).scaled(int(newSide * ReductionFactor), int(newSide * ReductionFactor))
+            self.label_pic.setPixmap(self.pixdst)
+
+        except:
+            self.showMessageBox()
+
+    def mousePressEvent(self, e):
+        if e.buttons() == QtCore.Qt.RightButton:
+            self.scaling.setValue(100)
+            self.rotation.setValue(0)
+            print('缩放 1', '旋转 0')
 
     def MidGrayThm(self):
         print('successfully')
@@ -231,7 +401,7 @@ class initUI(QtWidgets.QMainWindow):
         print('successfully')
 
     def showMessageBox(self):
-       print('保存错误')
+       print('错误')
 
 if __name__ == '__main__':
     import sys
