@@ -590,7 +590,7 @@ class initUI(QtWidgets.QMainWindow):
             fig.subplots_adjust(wspace=0, hspace=0)
             fig.tight_layout()
             plt.tight_layout()
-            fig.canvas.set_window_title('图像%s等分'%(str(n**2),))
+            fig.canvas.set_window_title('图像%s等份'%(str(n**2),))
             plt.show()
 
         except Exception as e:
