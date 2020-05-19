@@ -217,10 +217,15 @@ class initUI(QtWidgets.QMainWindow):
             self.label_pic.setPixmap(self.pic)
             print(width, height)
 
-            if width < 1000 & height < 1000:
-                self.setFixedSize(width * 1.2, height * 1.2)
-            elif width > 1000 & height > 1000:
-                self.setFixedSize(width, height)
+            if (width < 1000) | (height < 1000):
+                # self.setFixedSize(width * 1.2, height * 1.2)
+                self.resize(width * 1.2, height * 1.2)
+            elif (width > 1000) | (height > 1000):
+                # self.setFixedSize(width, height)
+                self.resize(width, height)
+            else:
+                # self.setFixedSize(1000, 1000)
+                self.resize(1000, 1000)
 
             self.scaling.setValue(100)
             self.rotation.setValue(0)
