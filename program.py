@@ -755,7 +755,7 @@ class Comprfunc(QtWidgets.QWidget):
         self.move(qr.topLeft())
 
     def widget(self):
-        self.comlab = QtWidgets.QLabel('切割参数：', self)
+        self.comlab = QtWidgets.QLabel('压缩参数：', self)
         self.comlab.setFont(QtGui.QFont("Arial", 18))
         self.comlab.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
         self.comnum = QtWidgets.QLineEdit('5', self)
@@ -772,7 +772,7 @@ class Comprfunc(QtWidgets.QWidget):
         self.comnum.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 0)
         self.comnum.setStyleSheet('border: none;')
         # self.comnum.setStyleSheet('background-color: #fff')
-        self.commit = QtWidgets.QPushButton('切图', self)
+        self.commit = QtWidgets.QPushButton('压缩', self)
         self.commit.setFont(QtGui.QFont("Arial", 20))
         self.commit.setStyleSheet('padding: 8 8 8 8; background-color: ##4477ff; border-radius: 20; color: black')
 
@@ -789,7 +789,7 @@ class Comprfunc(QtWidgets.QWidget):
             traceback.print_exc()
 
         finally:
-            print('切图完成!')
+            print('压缩完成!')
 
     def layout(self):
         self.Hbox = QtWidgets.QHBoxLayout(self)
@@ -866,7 +866,7 @@ class Secfunc(QtWidgets.QWidget):
             traceback.print_exc()
 
         finally:
-            print('切图完成!')
+            print('切割完成!')
 
 if __name__ == '__main__':
     import sys
