@@ -8,6 +8,7 @@ from PyQt5 import QtCore
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import cv2
 import math
 
@@ -114,21 +115,21 @@ class initUI(QtWidgets.QMainWindow):
         self.save.setShortcut('Ctrl+S')
         self.quit = QtWidgets.QAction('退出程序' ,self)
         self.quit.setShortcut('Ctrl+Alt+Q')
-        self.midgray = QtWidgets.QAction('图像转中灰')
-        self.light = QtWidgets.QAction('图像转浅灰')
-        self.dark = QtWidgets.QAction('图像转深灰')
-        self.binarization = QtWidgets.QAction('图像二值化')
-        self.gaussfilter = QtWidgets.QAction('高斯滤波')
-        self.medianfilter = QtWidgets.QAction('中值滤波')
-        self.meanfilter = QtWidgets.QAction('均值滤波')
-        self.twicecompress = QtWidgets.QAction('图像二倍压缩')
-        self.quintupling = QtWidgets.QAction('图像五倍压缩')
-        self.tenfoldcompression = QtWidgets.QAction('图像十倍压缩')
-        self.quartile = QtWidgets.QAction('图像四等分')
-        self.NineEqualparts = QtWidgets.QAction('图像九等分')
-        self.AIcutout = QtWidgets.QAction('智能边缘抠图')
-        self.bgmean = QtWidgets.QAction('背景颜色均值')
-        self.imageSynthesis = QtWidgets.QAction('图像合成')
+        self.midgray = QtWidgets.QAction('图像转中灰' ,self)
+        self.light = QtWidgets.QAction('图像转浅灰' ,self)
+        self.dark = QtWidgets.QAction('图像转深灰' ,self)
+        self.binarization = QtWidgets.QAction('图像二值化' ,self)
+        self.gaussfilter = QtWidgets.QAction('高斯滤波' ,self)
+        self.medianfilter = QtWidgets.QAction('中值滤波' ,self)
+        self.meanfilter = QtWidgets.QAction('均值滤波' ,self)
+        self.twicecompress = QtWidgets.QAction('图像二倍压缩' ,self)
+        self.quintupling = QtWidgets.QAction('图像五倍压缩' ,self)
+        self.tenfoldcompression = QtWidgets.QAction('图像十倍压缩' ,self)
+        self.quartile = QtWidgets.QAction('图像四等分' ,self)
+        self.NineEqualparts = QtWidgets.QAction('图像九等分' ,self)
+        self.AIcutout = QtWidgets.QAction('智能边缘抠图' ,self)
+        self.Chinese = QtWidgets.QAction('中文模式' ,self)
+        self.English = QtWidgets.QAction('英文模式' ,self)
 
         self.file.addAction(self.open)
         self.file.addAction(self.save)
@@ -147,9 +148,9 @@ class initUI(QtWidgets.QMainWindow):
         self.section.addAction(self.NineEqualparts)
         self.cutout.addAction(self.AIcutout)
 
-        self.cutmore = self.cutout.addMenu('提取背景')
-        self.cutmore.addAction(self.bgmean)
-        self.cutmore.addAction(self.imageSynthesis)
+        self.cutmore = self.cutout.addMenu('语言设置')
+        self.cutmore.addAction(self.Chinese)
+        self.cutmore.addAction(self.English)
 
     def menuEvent(self):
         self.open.triggered.connect(self.OpenFile)
@@ -173,15 +174,14 @@ class initUI(QtWidgets.QMainWindow):
         self.NineEqualparts.triggered.connect(self.NineEqualPartsThm)
 
         self.AIcutout.triggered.connect(self.AIcutoutThm)
-        self.bgmean.triggered.connect(self.BgMeanThm)
-        self.imageSynthesis.triggered.connect(self.ImageSynthesisThm)
 
     def SliderEvent(self):
         self.scaling.valueChanged.connect(self.ScalingValueChanged)
         self.rotation.valueChanged.connect(self.RotationValueChanged)
 
     def UIsetting(self):
-        pass
+        self.Chinese.triggered.connect(self.ChineseLang)
+        self.English.triggered.connect(self.EnglishLang)
 
     # ignore test of the triggered[QtWidgets.QAction]
     def processtrigger(self, Qaction):
@@ -555,20 +555,33 @@ class initUI(QtWidgets.QMainWindow):
             item_height = int(height / 2)
             box_list = []
             # (left, upper, right, lower)
-            for i in range(0, 2):  # 两重循环，生成 4 张图片基于原图的位置
+            for i in range(0, 2):  # 两重循环，生成 9 张图片基于原图的位置
                 for j in range(0, 2):
                     # print((i*item_width,j*item_width,(i+1)*item_width,(j+1)*item_width))
                     box = (j * item_width, i * item_height, (j + 1) * item_width, (i + 1) * item_height)
                     box_list.append(box)
             image_list = [pilimage.crop(box) for box in box_list]
+            mpl.use('Qt5Agg')
+            plt.rcParams['toolbar'] = 'None'
+            plt.style.use('dark_background')
+            fig = plt.figure()
             for i in range(4):
                 plt.subplot(2, 2, i + 1), plt.imshow(image_list[i], 'gray')
                 plt.title(str(i + 1))
-                plt.xticks([]), plt.yticks([])
+                plt.axis('off')
+
+            fig.subplots_adjust(wspace=0, hspace=0)
+            fig.tight_layout()
+            plt.tight_layout()
+            fig.canvas.set_window_title('图像九等分')
             plt.show()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('图像切割完成')
 
     def NineEqualPartsThm(self):
         try:
@@ -583,40 +596,96 @@ class initUI(QtWidgets.QMainWindow):
                     box = (j * item_width, i * item_height, (j + 1) * item_width, (i + 1) * item_height)
                     box_list.append(box)
             image_list = [pilimage.crop(box) for box in box_list]
+            mpl.use('Qt5Agg')
+            plt.rcParams['toolbar'] = 'None'
+            plt.style.use('dark_background')
+            fig = plt.figure()
             for i in range(9):
                 plt.subplot(3, 3, i + 1), plt.imshow(image_list[i], 'gray')
                 plt.title(str(i + 1))
-                plt.xticks([]), plt.yticks([])
+                plt.axis('off')
+
+            fig.subplots_adjust(wspace=0, hspace=0)
+            fig.tight_layout()
+            plt.tight_layout()
+            fig.canvas.set_window_title('图像九等分')
             plt.show()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('图像切割完成')
 
     def AIcutoutThm(self):
         try:
             import paddlehub as hub
-            print(filename)
-            file = []
-            # file = filename
-            file.append(filename)
+            import matplotlib.image as mpimg
+            from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+            from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
+            from matplotlib.figure import Figure
 
-            # 加载模型
             humanseg = hub.Module(name="deeplabv3p_xception65_humanseg")
-            print(humanseg)
-            # 抠图
-            result = humanseg.segmentation(data = {"image": file})
-            # print(result.shape)
-            print(len(result))
-            print(result[0]['data'].shape)
-            result_seg = result[0]['data']
-            # result_img = cv2.imread(result_seg, cv2.IMREAD_COLOR)
-            result_seg = result_seg / 255
-            # print(result_seg.shape)
-            # print(result_seg)
-            result_img = cv2.cvtColor(result_seg, cv2.COLOR_BGR2RGBA)
+            results = humanseg.segmentation(data={"image": [filename]}, output_dir='outputImgs')
+
+            result_img = mpimg.imread(results[0]['processed'])
+            print(result_img.shape)
+            mpl.use('Qt5Agg')
+            plt.rcParams['toolbar'] = 'None'
+            plt.style.use('dark_background')
+            fig, ax = plt.subplots(1, 1, figsize=(int(result_img.shape[1]/100),int(result_img.shape[0]/100)), dpi=100)
+            print(fig)
+            print(ax)
+            fig.subplots_adjust(wspace=0, hspace=0)
+            fig.tight_layout()
+            plt.tight_layout()
+            plt.subplot(1,1,1)
             plt.imshow(result_img)
-            # plt.xticks([]), plt.yticks([])
-            # plt.show()
+            plt.title(results[0]['processed'])
+            plt.axis('off')
+            fig.canvas.set_window_title(results[0]['processed'])
+            # fig.canvas.manager.window.overrideredirect(1)
+            print(type(fig.canvas))
+            plt.show()
+
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('边缘检测成功')
+
+    def ChineseLang(self):
+        try:
+            self.file.setTitle('File')
+            self.gray.setTitle('Gray')
+            self.clearupnoise.setTitle('ClearupNoise')
+            self.compress.setTitle('Compress')
+            self.section.setTitle('Section')
+            self.cutout.setTitle('Cutout')
+            self.open.setText('open')
+            self.save.setText('save')
+            self.quit.setText('quit')
+            self.midgray.setText('midgray')
+            self.light.setText('light')
+            self.dark.setText('dark')
+            self.binarization.setText('binarization')
+            self.gaussfilter.setText('gaussfilter')
+            self.medianfilter.setText('medianfilter')
+            self.meanfilter.setText('meanfilter')
+            self.twicecompress.setText('twicecompress')
+            self.quintupling.setText('quintupling')
+            self.tenfoldcompression.setText('tenfoldcompression')
+            self.quartile.setText('quartile')
+            self.NineEqualparts.setText('NineEqualparts')
+            self.AIcutout.setText('AIcutout')
+            self.cutmore.setTitle('SettingLang')
+            self.Chinese.setText('Chinese')
+            self.English.setText('English')
+            self.scaleSign.setText('scale')
+            self.angelSign.setText('angel')
+            self.setWindowTitle('ImageProcessing')
 
         except Exception as e:
             print(e)
@@ -625,11 +694,43 @@ class initUI(QtWidgets.QMainWindow):
         finally:
             print('异常清理')
 
-    def BgMeanThm(self):
-        print('successfully')
+    def EnglishLang(self):
+        try:
+            self.file.setTitle('File')
+            self.gray.setTitle('Gray')
+            self.clearupnoise.setTitle('ClearupNoise')
+            self.compress.setTitle('Compress')
+            self.section.setTitle('Section')
+            self.cutout.setTitle('Cutout')
+            self.open.setText('open')
+            self.save.setText('save')
+            self.quit.setText('quit')
+            self.midgray.setText('midgray')
+            self.light.setText('light')
+            self.dark.setText('dark')
+            self.binarization.setText('binarization')
+            self.gaussfilter.setText('gaussfilter')
+            self.medianfilter.setText('medianfilter')
+            self.meanfilter.setText('meanfilter')
+            self.twicecompress.setText('twicecompress')
+            self.quintupling.setText('quintupling')
+            self.tenfoldcompression.setText('tenfoldcompression')
+            self.quartile.setText('quartile')
+            self.NineEqualparts.setText('NineEqualparts')
+            self.AIcutout.setText('AIcutout')
+            self.cutmore.setTitle('SettingLang')
+            self.Chinese.setText('Chinese')
+            self.English.setText('English')
+            self.scaleSign.setText('scale')
+            self.angelSign.setText('angel')
+            self.setWindowTitle('ImageProcessing')
 
-    def ImageSynthesisThm(self):
-        print('successfully')
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('异常清理')
 
     def showMessageBox(self):
        print('异常清理')
