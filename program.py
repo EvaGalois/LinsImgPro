@@ -29,6 +29,7 @@ class initUI(QtWidgets.QMainWindow):
         self.setMinimumSize(400, 400)
         # self.setFixedSize(self.width(), self.height())
         self.setStyleSheet('background-color: #000')
+        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.center()
         self.widgets()
         self.layouts()
@@ -44,27 +45,33 @@ class initUI(QtWidgets.QMainWindow):
         self.move(qr.topLeft())
 
     def widgets(self):
-        # self.scaling = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.scaling = QtWidgets.QSlider(QtCore.Qt.Vertical)
-        # self.rotation = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.rotation = QtWidgets.QSlider(QtCore.Qt.Vertical)
+        try:
+            # self.scaling = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+            self.scaling = QtWidgets.QSlider(QtCore.Qt.Vertical)
+            # self.rotation = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+            self.rotation = QtWidgets.QSlider(QtCore.Qt.Vertical)
 
-        self.scaling.setMinimum(2)
-        self.scaling.setMaximum(200)
-        self.scaling.setSingleStep(2)
-        self.scaling.setTickInterval(2)
-        self.scaling.setValue(100)
-        self.scaling.setTickPosition(QtWidgets.QSlider.TicksLeft)
-        # self.scaling.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
-        self.rotation.setMinimum(-180)
-        self.rotation.setMaximum(180)
-        self.rotation.setSingleStep(4)
-        self.rotation.setTickInterval(4)
-        self.rotation.setValue(0)
-        self.rotation.setTickPosition(QtWidgets.QSlider.TicksRight)
-        # self.rotation.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+            self.scaling.setMinimum(2)
+            self.scaling.setMaximum(200)
+            self.scaling.setSingleStep(2)
+            self.scaling.setTickInterval(2)
+            self.scaling.setValue(100)
+            self.scaling.setTickPosition(QtWidgets.QSlider.TicksLeft)
+            # self.scaling.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+            # self.scaling.setEnabled(False)
+            self.rotation.setMinimum(-180)
+            self.rotation.setMaximum(180)
+            self.rotation.setSingleStep(4)
+            self.rotation.setTickInterval(4)
+            self.rotation.setValue(0)
+            self.rotation.setTickPosition(QtWidgets.QSlider.TicksRight)
+            # self.rotation.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+            # self.rotation.setEnabled(False)
 
-        self.label_pic = QtWidgets.QLabel(self)
+            self.label_pic = QtWidgets.QLabel(self)
+
+        except Exception:
+            pass
 
     def layouts(self):
         # 实例化一个 QWidget 类
@@ -125,8 +132,10 @@ class initUI(QtWidgets.QMainWindow):
         self.twicecompress = QtWidgets.QAction('图像二倍压缩' ,self)
         self.quintupling = QtWidgets.QAction('图像五倍压缩' ,self)
         self.tenfoldcompression = QtWidgets.QAction('图像十倍压缩' ,self)
-        self.quartile = QtWidgets.QAction('图像四等分' ,self)
-        self.NineEqualparts = QtWidgets.QAction('图像九等分' ,self)
+        self.customizedCompr = QtWidgets.QAction('自定义压缩' ,self)
+        self.quartile = QtWidgets.QAction('图像四切' ,self)
+        self.NineEqualparts = QtWidgets.QAction('图像九切' ,self)
+        self.customizedSec = QtWidgets.QAction('自定义切图' ,self)
         self.AIcutout = QtWidgets.QAction('智能边缘抠图' ,self)
         self.Chinese = QtWidgets.QAction('中文模式' ,self)
         self.English = QtWidgets.QAction('英文模式' ,self)
@@ -144,8 +153,10 @@ class initUI(QtWidgets.QMainWindow):
         self.compress.addAction(self.twicecompress)
         self.compress.addAction(self.quintupling)
         self.compress.addAction(self.tenfoldcompression)
+        self.compress.addAction(self.customizedCompr)
         self.section.addAction(self.quartile)
         self.section.addAction(self.NineEqualparts)
+        self.section.addAction(self.customizedSec)
         self.cutout.addAction(self.AIcutout)
 
         self.cutmore = self.cutout.addMenu('语言设置')
@@ -166,12 +177,14 @@ class initUI(QtWidgets.QMainWindow):
         self.medianfilter.triggered.connect(self.MedianFilterThm)
         self.meanfilter.triggered.connect(self.MeanFilterThm)
 
-        self.twicecompress.triggered.connect(self.TwiceCompressThm)
-        self.quintupling.triggered.connect(self.QuintuplingThm)
-        self.tenfoldcompression.triggered.connect(self.TenfoldCompressionThm)
+        self.twicecompress.triggered.connect(lambda:self.Compressing(2))
+        self.quintupling.triggered.connect(lambda:self.Compressing(5))
+        self.tenfoldcompression.triggered.connect(lambda:self.Compressing(10))
+        self.customizedCompr.triggered.connect(self.customizedComprfunc)
 
-        self.quartile.triggered.connect(self.QuartileThm)
-        self.NineEqualparts.triggered.connect(self.NineEqualPartsThm)
+        self.quartile.triggered.connect(lambda:self.Sec(2))
+        self.NineEqualparts.triggered.connect(lambda:self.Sec(3))
+        self.customizedSec.triggered.connect(self.customizedSecfunc)
 
         self.AIcutout.triggered.connect(self.AIcutoutThm)
 
@@ -214,9 +227,12 @@ class initUI(QtWidgets.QMainWindow):
 
             self.label_pic.resize(width, height)
             self.label_pic.setAlignment(QtCore.Qt.AlignCenter)
+            self.scaling.setEnabled(True)
+            self.rotation.setEnabled(True)
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
 
     def SaveFile(self):
         #获取文件路径
@@ -230,8 +246,9 @@ class initUI(QtWidgets.QMainWindow):
             cv2.imwrite(file_name[0], mat_img)
             # self.btn_saveFile = QPushButton(self)
             # self.btn_saveFile.file(filename,file_name[0])
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
 
     def qimage2mat(self, qimg):
         try:
@@ -277,9 +294,6 @@ class initUI(QtWidgets.QMainWindow):
 
             imgRotate = cv2.warpAffine(RGBimgIm, matRotate, (newSide, newSide), borderValue=(0, 0, 0))
 
-            # cv2.imshow("imgRotate", imgRotate)
-            # cv2.waitKey(0)
-
             totalBytes = imgRotate.nbytes
             bytesPerLine = int(totalBytes / newSide)
             image = QtGui.QImage(imgRotate, newSide, newSide, bytesPerLine, QtGui.QImage.Format_RGB888)
@@ -296,8 +310,10 @@ class initUI(QtWidgets.QMainWindow):
             self.pic = QtGui.QPixmap(image).scaled(int(newSide * zoomScale * ReductionFactor), int(newSide * zoomScale * ReductionFactor))
             self.label_pic.setPixmap(self.pic)
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            # print(e)
+            # traceback.print_exc()
+            pass
 
     def RotationValueChanged(self):
         try:
@@ -351,8 +367,10 @@ class initUI(QtWidgets.QMainWindow):
             self.pixdst = QtGui.QPixmap(imgRotate).scaled(int(newSide * ReductionFactor), int(newSide * ReductionFactor))
             self.label_pic.setPixmap(self.pixdst)
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            # print(e)
+            # traceback.print_exc()
+            pass
 
     def mousePressEvent(self, e):
         if e.buttons() == QtCore.Qt.RightButton:
@@ -372,12 +390,16 @@ class initUI(QtWidgets.QMainWindow):
             if k == 27:
                 cv2.destroyAllWindows()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('图像中性灰完成')
 
     def LightThm(self):
         try:
-            print(filename,"图像转浅灰")
+            print(filename, "图像转浅灰")
             cv2.namedWindow("LightGRAY")
             cv2.resizeWindow("LightGRAY", int(width * 1), int(height * 1))
             LightGray = imgGray
@@ -394,12 +416,16 @@ class initUI(QtWidgets.QMainWindow):
             if k == 27:
                 cv2.destroyAllWindows()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('图像浅灰完成')
 
     def DarkThm(self):
         try:
-            print(filename,"图像转浅灰")
+            print(filename, "图像转深灰")
             cv2.namedWindow("DarkGRAY")
             cv2.resizeWindow("DarkGRAY", int(width * 1), int(height * 1))
             DarkGray = imgGray
@@ -416,8 +442,12 @@ class initUI(QtWidgets.QMainWindow):
             if k == 27:
                 cv2.destroyAllWindows()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('图像深灰完成')
 
     def BinarizationThm(self):
         try:
@@ -431,8 +461,12 @@ class initUI(QtWidgets.QMainWindow):
             if k == 27:
                 cv2.destroyAllWindows()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('图像二值化完成')
 
     def GaussFilterThm(self):
         try:
@@ -445,8 +479,12 @@ class initUI(QtWidgets.QMainWindow):
             if k == 27:
                 cv2.destroyAllWindows()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('图像滤波完成')
 
     def MedianFilterThm(self):
         try:
@@ -459,8 +497,12 @@ class initUI(QtWidgets.QMainWindow):
             if k == 27:
                 cv2.destroyAllWindows()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('图像滤波完成')
 
     def MeanFilterThm(self):
         try:
@@ -473,12 +515,17 @@ class initUI(QtWidgets.QMainWindow):
             if k == 27:
                 cv2.destroyAllWindows()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
 
-    def TwiceCompressThm(self):
+        finally:
+            print('图像滤波完成')
+
+    def Compressing(self, compreN=2):
         try:
-            decreaseimg = cv2.resize(orimg, (int(0.5 * width), int(0.5 * height)))
+            compreNum = 1 / compreN
+            decreaseimg = cv2.resize(orimg, (int(compreNum * width), int(compreNum * height)))
             RGBdecimg = cv2.cvtColor(decreaseimg, cv2.COLOR_BGR2RGB)
             decheight, decwidth, decnframes, = RGBdecimg.shape
             totalBytes = RGBdecimg.nbytes
@@ -491,72 +538,37 @@ class initUI(QtWidgets.QMainWindow):
             cv2.resizeWindow("original", width, height)
             cv2.imshow("original", orimg)
             cv2.namedWindow("compression", cv2.WINDOW_NORMAL)
-            # cv2.resizeWindow("compression", int(width * 0.5), int(height * 0.5))
+            cv2.resizeWindow("compression", int(width * compreN), int(height * compreN))
             cv2.imshow("compression", decreaseimg)
             k = cv2.waitKey(0)
             if k == 27:
                 cv2.destroyAllWindows()
 
-        except:
-            self.showMessageBox()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
 
-    def QuintuplingThm(self):
+        finally:
+            print('图像压缩完成')
+
+    def customizedComprfunc(self):
         try:
-            decreaseimg = cv2.resize(orimg, (int(0.2 * width),int(0.2 * height)))
-            RGBdecimg = cv2.cvtColor(decreaseimg, cv2.COLOR_BGR2RGB)
-            decheight, decwidth, decnframes, = RGBdecimg.shape
-            totalBytes = RGBdecimg.nbytes
-            decbytesPerLine = int(totalBytes / decheight)
-            decimage = QtGui.QImage(RGBdecimg, decwidth, decheight, decbytesPerLine, QtGui.QImage.Format_RGB888)
-            self.decpix = QtGui.QPixmap(decimage).scaled(decwidth, decheight)
-            self.label_pic.setPixmap(self.decpix)
+            self.ComprfuncWindow = Comprfunc()
+            self.ComprfuncWindow.show()
 
-            cv2.namedWindow("original", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow("original", width, height)
-            cv2.imshow("original", orimg)
-            cv2.namedWindow("compression", cv2.WINDOW_NORMAL)
-            # cv2.resizeWindow("compression", int(width * 0.2), int(height * 0.2))
-            cv2.imshow("compression", decreaseimg)
-            k = cv2.waitKey(0)
-            if k == 27:
-                cv2.destroyAllWindows()
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
 
-        except:
-            self.showMessageBox()
-
-    def TenfoldCompressionThm(self):
-        try:
-            decreaseimg = cv2.resize(orimg, (int(0.1 * width),int(0.1 * height)))
-            RGBdecimg = cv2.cvtColor(decreaseimg, cv2.COLOR_BGR2RGB)
-            decheight, decwidth, decnframes, = RGBdecimg.shape
-            totalBytes = RGBdecimg.nbytes
-            decbytesPerLine = int(totalBytes / decheight)
-            decimage = QtGui.QImage(RGBdecimg, decwidth, decheight, decbytesPerLine, QtGui.QImage.Format_RGB888)
-            self.decpix = QtGui.QPixmap(decimage).scaled(decwidth, decheight)
-            self.label_pic.setPixmap(self.decpix)
-
-            cv2.namedWindow("original", cv2.WINDOW_NORMAL)
-            cv2.resizeWindow("original", width, height)
-            cv2.imshow("original", orimg)
-            cv2.namedWindow("compression", cv2.WINDOW_NORMAL)
-            # cv2.resizeWindow("compression", int(width * 0.1), int(height * 0.1))
-            cv2.imshow("compression", decreaseimg)
-            k = cv2.waitKey(0)
-            if k == 27:
-                cv2.destroyAllWindows()
-
-        except:
-            self.showMessageBox()
-
-    def QuartileThm(self):
+    def Sec(self, n=2):
         try:
             pilimage = Image.open(filename)
-            item_width = int(width / 2)
-            item_height = int(height / 2)
+            item_width = int(width / n)
+            item_height = int(height / n)
             box_list = []
             # (left, upper, right, lower)
-            for i in range(0, 2):  # 两重循环，生成 9 张图片基于原图的位置
-                for j in range(0, 2):
+            for i in range(0, n):  # 两重循环，生成 n^2 张图片基于原图的位置
+                for j in range(0, n):
                     # print((i*item_width,j*item_width,(i+1)*item_width,(j+1)*item_width))
                     box = (j * item_width, i * item_height, (j + 1) * item_width, (i + 1) * item_height)
                     box_list.append(box)
@@ -565,15 +577,15 @@ class initUI(QtWidgets.QMainWindow):
             plt.rcParams['toolbar'] = 'None'
             plt.style.use('dark_background')
             fig = plt.figure()
-            for i in range(4):
-                plt.subplot(2, 2, i + 1), plt.imshow(image_list[i], 'gray')
+            for i in range(n**2):
+                plt.subplot(n, n, i + 1), plt.imshow(image_list[i], 'gray')
                 plt.title(str(i + 1))
                 plt.axis('off')
 
             fig.subplots_adjust(wspace=0, hspace=0)
             fig.tight_layout()
             plt.tight_layout()
-            fig.canvas.set_window_title('图像九等分')
+            fig.canvas.set_window_title('图像%s等分'%(str(n**2),))
             plt.show()
 
         except Exception as e:
@@ -583,40 +595,14 @@ class initUI(QtWidgets.QMainWindow):
         finally:
             print('图像切割完成')
 
-    def NineEqualPartsThm(self):
+    def customizedSecfunc(self):
         try:
-            pilimage = Image.open(filename)
-            item_width = int(width / 3)
-            item_height = int(height / 3)
-            box_list = []
-            # (left, upper, right, lower)
-            for i in range(0, 3):  # 两重循环，生成 9 张图片基于原图的位置
-                for j in range(0, 3):
-                    # print((i*item_width,j*item_width,(i+1)*item_width,(j+1)*item_width))
-                    box = (j * item_width, i * item_height, (j + 1) * item_width, (i + 1) * item_height)
-                    box_list.append(box)
-            image_list = [pilimage.crop(box) for box in box_list]
-            mpl.use('Qt5Agg')
-            plt.rcParams['toolbar'] = 'None'
-            plt.style.use('dark_background')
-            fig = plt.figure()
-            for i in range(9):
-                plt.subplot(3, 3, i + 1), plt.imshow(image_list[i], 'gray')
-                plt.title(str(i + 1))
-                plt.axis('off')
-
-            fig.subplots_adjust(wspace=0, hspace=0)
-            fig.tight_layout()
-            plt.tight_layout()
-            fig.canvas.set_window_title('图像九等分')
-            plt.show()
+            self.SecfuncWindow = Secfunc()
+            self.SecfuncWindow.show()
 
         except Exception as e:
             print(e)
             traceback.print_exc()
-
-        finally:
-            print('图像切割完成')
 
     def AIcutoutThm(self):
         try:
@@ -686,6 +672,8 @@ class initUI(QtWidgets.QMainWindow):
             self.scaleSign.setText('scale')
             self.angelSign.setText('angel')
             self.setWindowTitle('ImageProcessing')
+            self.customizedCompr.setText('customizedCompr')
+            self.customizedSec.setText('customizedSec')
 
         except Exception as e:
             print(e)
@@ -724,6 +712,8 @@ class initUI(QtWidgets.QMainWindow):
             self.scaleSign.setText('scale')
             self.angelSign.setText('angel')
             self.setWindowTitle('ImageProcessing')
+            self.customizedCompr.setText('customizedCompr')
+            self.customizedSec.setText('customizedSec')
 
         except Exception as e:
             print(e)
@@ -733,7 +723,145 @@ class initUI(QtWidgets.QMainWindow):
             print('异常清理')
 
     def showMessageBox(self):
-       print('异常清理')
+       print('Successfully!')
+
+class Comprfunc(QtWidgets.QWidget):
+    def __init__(self):
+        super(Comprfunc, self).__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.resize(250, 100)
+        self.setFixedSize(self.width(), self.height())
+        self.setStyleSheet('background-color: #000')
+        # self.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint)
+
+        self.setWindowTitle('压缩图像')
+        self.setWindowIcon(QtGui.QIcon('web.png'))
+        self.center()
+        self.widget()
+        self.action()
+        self.layout()
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+    def widget(self):
+        self.comlab = QtWidgets.QLabel('切割参数：', self)
+        self.comlab.setFont(QtGui.QFont("Arial", 18))
+        self.comlab.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+        self.comnum = QtWidgets.QLineEdit('5', self)
+        self.comnum.setFont(QtGui.QFont("Arial", 30))
+        self.comnum.setPlaceholderText('Normal')
+        self.comnum.setEchoMode(QtWidgets.QLineEdit.Normal)
+
+        # 实例化整形验证器
+        IntValidator = QtGui.QIntValidator(self)
+        IntValidator.setRange(1, 99)
+        self.comnum.setValidator(IntValidator)
+
+        self.comnum.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+        self.comnum.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 0)
+        self.comnum.setStyleSheet('border: none;')
+        # self.comnum.setStyleSheet('background-color: #fff')
+        self.commit = QtWidgets.QPushButton('切图', self)
+        self.commit.setFont(QtGui.QFont("Arial", 20))
+        self.commit.setStyleSheet('padding: 8 8 8 8; background-color: ##4477ff; border-radius: 20; color: black')
+
+        self.commit.clicked.connect(self.action)
+
+    def action(self):
+        try:
+            log = initUI()
+            value = int(self.comnum.text())
+            log.Compressing(value)
+
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('切图完成!')
+
+    def layout(self):
+        self.Hbox = QtWidgets.QHBoxLayout(self)
+        self.Hbox.addWidget(self.comlab)
+        self.Hbox.addWidget(self.comnum)
+        self.Hbox.addWidget(self.commit)
+        self.Hbox.setContentsMargins(10, 10, 10, 10)
+        self.setLayout(self.Hbox)
+
+class Secfunc(QtWidgets.QWidget):
+    def __init__(self):
+        super(Secfunc, self).__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.resize(250, 100)
+        self.setFixedSize(self.width(), self.height())
+        self.setStyleSheet('background-color: #000')
+        # self.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint)
+
+        self.setWindowTitle('切割图像')
+        self.setWindowIcon(QtGui.QIcon('web.png'))
+        self.center()
+        self.widget()
+        self.action()
+        self.layout()
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
+    def widget(self):
+        self.seclab = QtWidgets.QLabel('切割参数：', self)
+        self.seclab.setFont(QtGui.QFont("Arial", 18))
+        self.seclab.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+        self.secnum = QtWidgets.QLineEdit('5', self)
+        self.secnum.setFont(QtGui.QFont("Arial", 30))
+        self.secnum.setPlaceholderText('Normal')
+        self.secnum.setEchoMode(QtWidgets.QLineEdit.Normal)
+
+        # 实例化整形验证器
+        IntValidator = QtGui.QIntValidator(self)
+        IntValidator.setRange(1, 99)
+        self.secnum.setValidator(IntValidator)
+
+        self.secnum.setStyleSheet('background-color: rgba(0, 0, 0, 0)')
+        self.secnum.setAttribute(QtCore.Qt.WA_MacShowFocusRect, 0)
+        self.secnum.setStyleSheet('border: none;')
+        # self.secnum.setStyleSheet('background-color: #fff')
+        self.secmit = QtWidgets.QPushButton('切图', self)
+        self.secmit.setFont(QtGui.QFont("Arial", 20))
+        self.secmit.setStyleSheet('padding: 8 8 8 8; background-color: #4477ff; border-radius: 20; color: black')
+
+        self.secmit.clicked.connect(self.action)
+
+    def layout(self):
+        self.Hbox = QtWidgets.QHBoxLayout(self)
+        self.Hbox.addWidget(self.seclab)
+        self.Hbox.addWidget(self.secnum)
+        self.Hbox.addWidget(self.secmit)
+        self.Hbox.setContentsMargins(10, 10, 10, 10)
+        self.setLayout(self.Hbox)
+
+    def action(self):
+        try:
+            log = initUI()
+            value = int(self.secnum.text())
+            log.Sec(value)
+
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+
+        finally:
+            print('切图完成!')
 
 if __name__ == '__main__':
     import sys
