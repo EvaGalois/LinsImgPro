@@ -231,9 +231,10 @@ class initUI(QtWidgets.QMainWindow):
             self.rotation.setValue(0)
 
             self.label_pic.resize(width, height)
-            self.label_pic.setAlignment(QtCore.Qt.AlignCenter)
+            # self.label_pic.setAlignment(QtCore.Qt.AlignCenter)
             self.scaling.setEnabled(True)
             self.rotation.setEnabled(True)
+            self.label_pic.setAlignment(QtCore.Qt.AlignCenter)
 
         except Exception as e:
             print(e)
